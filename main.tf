@@ -4,9 +4,8 @@ provider "aws" {
 
 resource "aws_s3_bucket" "bucketonecyber" {
   bucket = "bucketonecyber"
-}terraform 
-
-{
+}
+terraform {
   backend "s3" {
     # Replace this with your bucket name!
     bucket         = "bucketonecyber"
