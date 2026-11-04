@@ -46,9 +46,15 @@ jobs:
 
       # Deploy Terraform
       - name: Deploy Terraform
+        run: terraform apply -auto-approve      # Initialize Terraform
+      - name: Initialize Terraform
+        run: terraform init
+
+      # Deploy Terraform
+      - name: Deploy Terraform
         run: terraform apply -auto-approve
 
-        # Get WordPress instance public IP
-- name: Get WordPress Instance IP
-  id: get_ip
-  run: echo ": :set-output name=ip_address : : $ (terraform output -json instance_public_ip | jq -r ' . ')"
+      # Get WordPress instance public IP
+      - name: Get WordPress Instance IP
+        id: get_ip
+        run: echo "ip_address=$(terraform output -raw instance_public_ip)" >> "$GITHUB_OUTPUT"
