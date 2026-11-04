@@ -20,3 +20,4 @@ resource "aws_instance" "test6" {
     Name = "sundayexample-instance2"
 }
 }
+ 
