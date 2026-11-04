@@ -1,54 +1,42 @@
+
 name: AWS Automation Project 1
 
 on:
-
   push:
-
     branches:
-
       - main
 
 jobs:
   deploy-and-scan:
     name: Deploy WordPress on EC2 and IaC Scan
     runs-on: ubuntu-latest
-    steps:
 
+    steps:
+      # Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Terraform setup
-
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.0.0
 
-
-      # AWS credentials setup1
-
+      # Configure AWS credentials
       - name: Configure AWS credentials
-
-        uses: aws-actions/configure-aws-credentials@v2
-
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
           aws-region: eu-west-2
 
       # Initialize Terraform
       - name: Initialize Terraform
         run: terraform init
 
-
-      # Deploy Terraform
-      - name: Deploy Terraform
-        run: terraform apply -auto-approve      # Initialize Terraform
-      - name: Initialize Terraform
-        run: terraform init
+      # Validate Terraform
+      - name: Validate Terraform
+        run: terraform validate
 
       # Deploy Terraform
       - name: Deploy Terraform
@@ -57,4 +45,18 @@ jobs:
       # Get WordPress instance public IP
       - name: Get WordPress Instance IP
         id: get_ip
-        run: echo "ip_address=$(terraform output -raw instance_public_ip)" >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          INSTANCE_IP=$(terraform output -raw instance_public_ip)
+          echo "WordPress Public IP: $INSTANCE_IP"
+          if [ -z "$INSTANCE_IP" ]; then
+            echo "Error: No public IP returned"
+            exit 1
+          fi
+          printf 'ip_address=%s\n' "$INSTANCE_IP" >> "$GITHUB_OUTPUT"
+
+      # Display WordPress URL
+      - name: Display WordPress URL
+        run: |
+          echo "WordPress is available at:"
+          echo "http://${{ steps.get_ip.outputs.ip_address }}"
