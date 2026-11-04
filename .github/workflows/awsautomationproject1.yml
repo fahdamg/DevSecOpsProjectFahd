@@ -42,21 +42,4 @@ jobs:
       - name: Deploy Terraform
         run: terraform apply -auto-approve
 
-      # Get WordPress instance public IP
-      - name: Get WordPress Instance IP
-        id: get_ip
-        shell: bash
-        run: |
-          INSTANCE_IP=$(terraform output -raw instance_public_ip)
-          echo "WordPress Public IP: $INSTANCE_IP"
-          if [ -z "$INSTANCE_IP" ]; then
-            echo "Error: No public IP returned"
-            exit 1
-          fi
-          printf 'ip_address=%s\n' "$INSTANCE_IP" >> "$GITHUB_OUTPUT"
-
-      # Display WordPress URL
-      - name: Display WordPress URL
-        run: |
-          echo "WordPress is available at:"
-          echo "http://${{ steps.get_ip.outputs.ip_address }}"
+     
